@@ -1,6 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Hzg.Iot.Models;
 
-public class Device
+/// <summary>
+/// 设备表
+/// </summary>
+public class Device : BaseEntity
 {
-
+    /// <summary>
+    /// 用户 Id
+    /// </summary>
+    /// <value></value>
+    [Required]
+    public Guid UserId { get; set; }
 }

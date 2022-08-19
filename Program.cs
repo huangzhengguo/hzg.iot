@@ -1,4 +1,9 @@
+using Hzg.Iot.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// 配置数据库连接
+builder.Services.AddAccountDbSqlService(builder.Configuration);
 
 // 添加服务到容器
 builder.Services.AddControllers();

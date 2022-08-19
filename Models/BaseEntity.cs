@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Hzg.Iot.Models;
 
 /// <summary>
@@ -11,6 +13,13 @@ public abstract class BaseEntity<KeyT>
     /// </summary>
     /// <value></value>
     public KeyT Id { get; set; }
+
+    /// <summary>
+    /// 创建人
+    /// </summary>
+    /// <value></value>
+    [StringLength(64)]
+    public string CreateUser { get; set; }
 
     /// <summary>
     /// 创建时间

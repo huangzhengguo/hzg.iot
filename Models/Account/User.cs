@@ -55,4 +55,8 @@ public class User : BaseAccount
     /// <value></value>
     [StringLength(64)]
     public string Avatar { get; set; }
+
+    // 导航属性
+    public virtual ICollection<UserRole> UserRoles { get; set; }
+    public virtual ICollection<UserGroup> UserGroups { get; set; }
 }
