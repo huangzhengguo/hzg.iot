@@ -1,4 +1,4 @@
-namespace Hzg.Iot.Models;
+namespace Hzg.Models;
 
 /// <summary>
 /// 账号基类

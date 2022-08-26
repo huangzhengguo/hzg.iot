@@ -1,4 +1,4 @@
-namespace Hzg.Iot.Models;
+namespace Hzg.Models;
 
 public class UserGroup
 {

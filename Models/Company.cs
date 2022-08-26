@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Hzg.Models;
 
 namespace Hzg.Iot.Models;
 

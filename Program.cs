@@ -1,4 +1,4 @@
-using Hzg.Iot.Services;
+using Hzg.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

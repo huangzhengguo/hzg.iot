@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Hzg.Iot.Models;
+using Hzg.Models;
 
-namespace Hzg.Iot.Data;
+namespace Hzg.Data;
 
 public class AccountContext : DbContext
 {

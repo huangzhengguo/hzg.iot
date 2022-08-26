@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Hzg.Iot.Models;
+namespace Hzg.Models;
 
 /// <summary>
 /// 用户类

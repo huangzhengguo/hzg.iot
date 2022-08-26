@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Hzg.Iot.Models;
+namespace Hzg.Models;
 
 public class Group : BaseAccount
 {
