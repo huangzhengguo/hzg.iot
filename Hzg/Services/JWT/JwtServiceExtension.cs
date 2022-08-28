@@ -10,7 +10,7 @@ namespace Hzg.Services;
 public static class JwtServiceExtension
 {
     /// <summary>
-    /// 封装服务添加
+    /// JWT 服务
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="configuration">配置</param>
@@ -24,7 +24,7 @@ public static class JwtServiceExtension
         var audience = configuration[JwtOptionsConst.AudienceSettingPath];
         var security = configuration[JwtOptionsConst.SecurityKeySettingPath];
 
-        var key = Encoding.ASCII.GetBytes(security);
+        var key = Encoding.UTF8.GetBytes(security);
 
         services.AddAuthentication(options => {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

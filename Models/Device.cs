@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Hzg.Models;
 
 namespace Hzg.Iot.Models;
 
 /// <summary>
 /// 设备表
 /// </summary>
-public class Device : BaseEntity
+public class Device : BaseModel
 {
     /// <summary>
     /// 用户 Id

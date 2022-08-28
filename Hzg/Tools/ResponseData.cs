@@ -1,8 +1,6 @@
-using System;
 using Hzg.Const;
-using Hzg.Tool;
 
-namespace Hzg.Data;
+namespace Hzg.Tool;
 
 /// <summary>
 /// 返回固定格式

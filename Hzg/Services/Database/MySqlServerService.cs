@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Hzg.Data;
+using Hzg.Iot.Data;
 
 namespace Hzg.Services;
 
@@ -30,12 +31,11 @@ public static class MySqlServerServiceExtesion
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
-    static public void AddSqlService(IServiceCollection services, IConfiguration configuration)
+    static public void AddIotSqlService(this IServiceCollection services, IConfiguration configuration)
     {
-        // var serverVersion = new MySqlServerVersion(new Version(8, 0, 23));
-        // services.AddDbContext<LedinproContext>(options =>
-        // {
-        //     options.UseMySql(configuration.GetConnectionString("MySQLConnection"), serverVersion);
-        // });
+        services.AddDbContext<HzgIotContext>(options =>
+        {
+            options.UseMySql(configuration.GetConnectionString("HzgIotDbConnection"), serverVersion);
+        });
     }
 }

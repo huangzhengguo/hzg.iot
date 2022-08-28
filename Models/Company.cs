@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Hzg.Models;
 
 namespace Hzg.Iot.Models;
 
 /// <summary>
 /// 公司
 /// </summary>
-public class Company : BaseEntity
+public class Company : BaseModel
 {
     /// <summary>
     /// 公司名称

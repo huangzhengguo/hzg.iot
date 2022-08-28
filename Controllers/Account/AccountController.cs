@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Linq;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using Hzg.Services;
 using Hzg.Models;
 using Hzg.Const;
 using Hzg.Tool;
+using Hzg.Iot.Data;
 
 namespace Hzg.Iot.Controllers;
 
@@ -26,7 +28,7 @@ public class AccountController : ControllerBase
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
     private readonly IVerifyCodeService _verifyCodeService;
-
+    private readonly HzgIotContext _hzgIotContext;
 
     /// <summary>
     /// 构造方法
@@ -40,7 +42,8 @@ public class AccountController : ControllerBase
                              ILogger<LoginViewModel> logger,
                              IUserService userService,
                              IEmailService emailService,
-                             IVerifyCodeService verifyCodeService)
+                             IVerifyCodeService verifyCodeService,
+                             HzgIotContext hzgIotContext)
     {
         _accountContext = accountContext;
         _configuration = configuration;
@@ -49,6 +52,7 @@ public class AccountController : ControllerBase
         _logger = logger;
         _emailService = emailService;
         _verifyCodeService = verifyCodeService;
+        _hzgIotContext = hzgIotContext;
     }
 
     /// <summary>
@@ -61,17 +65,26 @@ public class AccountController : ControllerBase
     [Route("send-register-verify-code")]
     public async Task<string> SendRegisterVerifyCode(string email)
     {
-        var result = new ResponseData() {
+        var result = new ResponseData()
+        {
             Code = ErrorCode.ErrorCode_Success,
             Message = ErrorCodeMessage.Message(ErrorCode.ErrorCode_Success)
         };
+
+        // 检测邮箱是否已存在
+        var user = await _accountContext.Users.SingleOrDefaultAsync(u => u.Email == email);
+        if (user != null)
+        {
+            result.Message = "用户已存在!";
+            return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());;
+        }
 
         // 1. 生成验证码
         // 2. 保存验证码到 redis
         // 3. 发送验证码到邮箱
         _verifyCodeService.SendRegisterVerifyCode(email);
 
-        return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());;
+        return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
     }
 
     /// <summary>
@@ -87,8 +100,49 @@ public class AccountController : ControllerBase
     [Route("register")]
     public async Task<string> Register([FromBody] RegisterModel model)
     {
+        var result = new ResponseData()
+        {
+            Code = ErrorCode.ErrorCode_Failed,
+            Message = ErrorCodeMessage.Message(ErrorCode.ErrorCode_Failed)
+        };
 
-        return "";
+        // 检测用户是否已经注册
+        var exitUser = await _accountContext.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
+        if (exitUser != null)
+        {
+            result.Message = "用户已存在!";
+
+            return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
+        }
+
+        // 获取本地验证码
+        var localVerifyCode = RedisTool.GetStringValue(model.Email);
+        if (localVerifyCode == null || localVerifyCode.Equals(model.VerifyCode) == false)
+        {
+            // 验证码不一致
+            result.Message = "验证码过期或者不正确!";
+
+            return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
+        }
+
+        var user = new User();
+
+        user.Name = model.Email;
+        user.Email = model.Email;
+        user.Password = model.Password;
+    
+        _accountContext.Users.Add(user);
+
+        var count = await _accountContext.SaveChangesAsync();
+        if (count != 1)
+        {
+
+        }
+
+        result.Code = ErrorCode.ErrorCode_Success;
+        result.Message = "注册成功!";
+
+        return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
     }
 
     /// <summary>
@@ -116,12 +170,13 @@ public class AccountController : ControllerBase
 
             var jwtToken = _jwtService.GetnerateJWTToken(userDto);
 
-            // var menusToReturn = await MenuUtility.GetUserPermissionMenus(_ledinproContext, user.Name);
+            // 获取用户菜单权限数据
+            var menusPermissionsToReturn = await MenuTool.GetUserPermissionMenus(_hzgIotContext, user.Name);
 
             result.Data = new
             {
                 token = jwtToken,
-                // menuData = menusToReturn
+                menuData = menusPermissionsToReturn
             };
 
             return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
@@ -170,13 +225,17 @@ public class AccountController : ControllerBase
     /// <param name="group"></param>
     /// <returns></returns>
     [HttpGet]
-    [Route("getgroupusers")]
+    [Route("groupusers")]
     public async Task<string> GetGroupUsers(string group)
     {
         var users = new List<User>();
         if (group != null)
         {
-            // users = await _accountContext.Users.AsNoTracking().Where(u => u.Group == group).ToListAsync();
+            var groupModel = await _accountContext.Groups.SingleOrDefaultAsync(g => g.Name == group);
+            if (groupModel != null)
+            {
+                users = groupModel.UserGroups.Select((ug, i) => ug.User).ToList();
+            }
         }
         else
         {
@@ -235,9 +294,17 @@ public class AccountController : ControllerBase
                 userNodeModel.Id = gu.Id;
                 userNodeModel.ParentMenuId = m.Id;
                 userNodeModel.LabelValue = gu.Name;
-                // userNodeModel.Label = gu.Name + " (" + gu.Role + ")";
                 userNodeModel.IsLeaf = true;
                 userNodeModel.Disabled = false;
+
+                                // userNodeModel.Label = gu.Name + " (" + gu.Role + ")";
+                string roles = "";
+                foreach(var r in gu.UserRoles)
+                {
+                    roles = roles + r.Role.Name + ",";
+                }
+                
+                userNodeModel.Label = gu.Name + " (" + roles.TrimEnd(',') + ")";
 
                 childrenUserTreeData.Add(userNodeModel);
             }

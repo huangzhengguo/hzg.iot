@@ -1,4 +1,7 @@
 using StackExchange.Redis;
+using Hzg.Tool;
+
+using System.Diagnostics;
 
 namespace Hzg.Services;
 
@@ -37,12 +40,17 @@ public class VerifyCodeService : IVerifyCodeService
         body = String.Format(body, verifyCode);
 
         _emailService.SendEmail(email, body);
+        // 异步发送邮件
+        // _emailService.SendEmailAsync(email, body, result =>
+        // {
+        //     if (result == true)
+        //     {
+        //         RedisTool.SetStringValue(email, verifyCode);
+        //     }
+        // });
 
         // 存储到 Redis
-        ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost");
-        IDatabase db = redis.GetDatabase();
-
-        
+        RedisTool.SetStringValue(email, verifyCode);
     }
 
 }

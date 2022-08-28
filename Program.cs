@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Hzg.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // 配置数据库连接
 builder.Services.AddAccountDbSqlService(builder.Configuration);
+builder.Services.AddIotSqlService(builder.Configuration);
 
 // JWT 服务
 builder.Services.AddJwt(builder.Configuration);
@@ -23,6 +26,7 @@ builder.Services.AddTransient<IVerifyCodeService, VerifyCodeService>();
 // 邮件服务
 builder.Services.AddTransient<IEmailService, EmailService>();
 
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -39,6 +43,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
