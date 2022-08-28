@@ -24,6 +24,9 @@ public class AccountController : ControllerBase
     private readonly IJwtService _jwtService;
     private readonly ILogger<LoginViewModel> _logger;
     private readonly IUserService _userService;
+    private readonly IEmailService _emailService;
+    private readonly IVerifyCodeService _verifyCodeService;
+
 
     /// <summary>
     /// 构造方法
@@ -35,13 +38,57 @@ public class AccountController : ControllerBase
                              IConfiguration configuration,
                              IJwtService jwtService,
                              ILogger<LoginViewModel> logger,
-                             IUserService userService)
+                             IUserService userService,
+                             IEmailService emailService,
+                             IVerifyCodeService verifyCodeService)
     {
         _accountContext = accountContext;
         _configuration = configuration;
         _jwtService = jwtService;
         _userService = userService;
         _logger = logger;
+        _emailService = emailService;
+        _verifyCodeService = verifyCodeService;
+    }
+
+    /// <summary>
+    /// 获取注册验证码
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet]
+    [Route("send-register-verify-code")]
+    public async Task<string> SendRegisterVerifyCode(string email)
+    {
+        var result = new ResponseData() {
+            Code = ErrorCode.ErrorCode_Success,
+            Message = ErrorCodeMessage.Message(ErrorCode.ErrorCode_Success)
+        };
+
+        // 1. 生成验证码
+        // 2. 保存验证码到 redis
+        // 3. 发送验证码到邮箱
+        _verifyCodeService.SendRegisterVerifyCode(email);
+
+        return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());;
+    }
+
+    /// <summary>
+    /// 注册账号流程
+    /// 1. 获取验证码
+    /// 2. 输入注册信息及收到的验证码
+    /// 3. 注册账号
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("register")]
+    public async Task<string> Register([FromBody] RegisterModel model)
+    {
+
+        return "";
     }
 
     /// <summary>
