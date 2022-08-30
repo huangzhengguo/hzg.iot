@@ -11,9 +11,9 @@ namespace Hzg.Iot.Controllers;
 [ApiController]
 public class BaseController : ControllerBase
 {
-    protected readonly HzgIotContext iotContext;
+    protected readonly HzgIotContext context;
     public BaseController(HzgIotContext hzgIotContext)
     {
-        this.iotContext = hzgIotContext;
+        this.context = hzgIotContext;
     }
 }

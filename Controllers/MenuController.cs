@@ -17,6 +17,9 @@ using Hzg.Tool;
 
 namespace Hzg.Iot.Controllers;
 
+/// <summary>
+/// 菜单
+/// </summary>
 [Route("api/[controller]/")]
 public class MenuController : BaseController
 {
@@ -42,7 +45,7 @@ public class MenuController : BaseController
         };
 
         // 检测菜单是否已经存在
-        var m = await iotContext.Menus.AsNoTracking().Where(m => m.ParentMenuId == menu.ParentMenuId && m.Title == menu.Title).ToListAsync();
+        var m = await context.Menus.AsNoTracking().Where(m => m.ParentMenuId == menu.ParentMenuId && m.Title == menu.Title).ToListAsync();
         if (m != null && m.Count > 0)
         {
             result.Code = ErrorCode.ErrorCode_HasExisted;
@@ -51,8 +54,8 @@ public class MenuController : BaseController
             return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
         }
 
-        iotContext.Menus.Add(menu);
-        var n = await iotContext.SaveChangesAsync();
+        context.Menus.Add(menu);
+        var n = await context.SaveChangesAsync();
         if (n != 1)
         {
             result.Code = ErrorCode.ErrorCode_Failed;
@@ -82,12 +85,12 @@ public class MenuController : BaseController
         };
 
         // 检测菜单是否已经存在
-        var data = await iotContext.Menus.AsNoTracking().SingleOrDefaultAsync(m => m.Id == menu.Id);
+        var data = await context.Menus.AsNoTracking().SingleOrDefaultAsync(m => m.Id == menu.Id);
         if (data != null)
         {
-            iotContext.Update(menu);
+            context.Update(menu);
 
-            await iotContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             // 是否更新菜单对应的权限
 
@@ -116,13 +119,13 @@ public class MenuController : BaseController
             Message = "删除成功!"
         };
 
-        var m = await iotContext.Menus.SingleOrDefaultAsync(m => m.Id == id);
+        var m = await context.Menus.SingleOrDefaultAsync(m => m.Id == id);
         if (m != null)
         {
-            iotContext.Menus.Remove(m);
+            context.Menus.Remove(m);
         }
 
-        var n = await iotContext.SaveChangesAsync();
+        var n = await context.SaveChangesAsync();
         if (n != 1)
         {
             // 删除失败
@@ -131,13 +134,13 @@ public class MenuController : BaseController
         }
 
         // 需要删除菜单关联的权限数据
-        var mps = await iotContext.MenuPermissions.Where(p => p.SubMenuId == id).ToListAsync();
+        var mps = await context.MenuPermissions.Where(p => p.SubMenuId == id).ToListAsync();
         foreach(var mp in mps)
         {
-            iotContext.MenuPermissions.Remove(mp);
+            context.MenuPermissions.Remove(mp);
         }
 
-        await iotContext.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
     }
@@ -150,7 +153,7 @@ public class MenuController : BaseController
     [Route("get")]
     public async Task<string> Get()
     {
-        var data = await iotContext.Menus.AsNoTracking().ToListAsync();
+        var data = await context.Menus.AsNoTracking().ToListAsync();
 
         var jsonData = MenuTool.GenerateTreeData(data, null, null);
         var result = new ResponseData()
@@ -174,11 +177,11 @@ public class MenuController : BaseController
     {
         // 需要所有用户数据和菜单权限数据做对比，放到前端做对比
         // 这里只获取菜单权限数据
-        var menuPermissions = await iotContext.MenuPermissions.AsNoTracking().Where(m => m.UserName == userName).ToListAsync();
+        var menuPermissions = await context.MenuPermissions.AsNoTracking().Where(m => m.UserName == userName).ToListAsync();
 
         // 根据权限数据获取 Menu 列表
         var menusToReturn = new List<Menu>();
-        var menus = await iotContext.Menus.AsNoTracking().ToListAsync();
+        var menus = await context.Menus.AsNoTracking().ToListAsync();
         foreach(var p in menuPermissions)
         {
             foreach(var m in menus)

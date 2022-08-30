@@ -14,6 +14,12 @@ public class AccountContext : DbContext
     public virtual DbSet<Group> Groups { get; set; }
     // 用户角色
     public virtual DbSet<Role> Roles { get; set; }
+    // 用户分组
+    public virtual DbSet<UserGroup> UserGroups { get; set; }
+    // 分组角色
+    public virtual DbSet<RoleGroup> RoleGroups { get; set; }
+    // 角色用户
+    public virtual DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

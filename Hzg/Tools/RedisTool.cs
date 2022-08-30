@@ -7,7 +7,8 @@ public static class RedisTool
     private static ConnectionMultiplexer _redis;
     public static ConnectionMultiplexer Redis
     {
-        get {
+        get
+        {
             if (_redis == null)
             {
                 _redis = ConnectionMultiplexer.Connect("localhost");
