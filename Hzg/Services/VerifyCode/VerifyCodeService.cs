@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using Hzg.Const;
 using Hzg.Tool;
 
 using System.Diagnostics;
@@ -7,6 +8,8 @@ namespace Hzg.Services;
 
 public class VerifyCodeService : IVerifyCodeService
 {
+    private int EMAIL_CODE_INTERVAL = 300;
+
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
 
@@ -17,40 +20,58 @@ public class VerifyCodeService : IVerifyCodeService
     }
 
     /// <summary>
-    /// 生成验证码
+    /// 生成验证码并保存到 Redis
     /// </summary>
-    /// <param name="minValue">最大值</param>
-    /// <param name="maxValue">最小值</param>
+    /// <param name="email"></param>
     /// <returns></returns>
-    public string GenerateVerifyCode(int minValue = 1000, int maxValue = 9999)
+    public (bool valid, String result) GenerateEmailRegisterVerifycode(String email)
     {
-        return new Random().Next(minValue, maxValue).ToString();
+        return GenerateEmailVerifycode(CommonConstant.EMAIL_REGISTER_CODE_KEY, email);
     }
 
     /// <summary>
-    /// 发送注册验证码
+    /// 生成验证码并保存到 Redis
     /// </summary>
-    /// <param name="email">邮箱</param>
-    public void SendRegisterVerifyCode(string email)
+    /// <param name="email"></param>
+    /// <returns></returns>
+    public (bool valid, String result) GenerateEmailResetPasswordVerifycode(String email)
     {
-        var verifyCode = GenerateVerifyCode();
+        return GenerateEmailVerifycode(CommonConstant.EMAIL_RESETPSW_CODE_KEY, email);
+    }
 
-        var body = _configuration["email:body"];
-
-        body = String.Format(body, verifyCode);
-
-        _emailService.SendEmail(email, body);
-        // 异步发送邮件
-        // _emailService.SendEmailAsync(email, body, result =>
-        // {
-        //     if (result == true)
-        //     {
-        //         RedisTool.SetStringValue(email, verifyCode);
-        //     }
-        // });
+    /// <summary>
+    /// 生成验证码
+    /// </summary>
+    /// <param name="typePrefix"></param>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    private (bool valid, String result) GenerateEmailVerifycode(string typePrefix, string email)
+    {
+        // 验证邮箱格式
+        if (EmailTool.ValidateEmail(email) == false)
+        {
+            return (false, "The mailbox format is invalid");
+        }
 
         // 存储到 Redis
-        RedisTool.SetStringValue(email, verifyCode);
+        String key = typePrefix + email;
+        string exitCode = RedisTool.GetStringValue(key);
+        if (string.IsNullOrWhiteSpace(exitCode) == false)
+        {
+            long leftSeconds = RedisTool.GetRemainingSeconds(key);
+            long usedSeconds = CommonConstant.CODE_TIME - leftSeconds;
+
+            if (usedSeconds < EMAIL_CODE_INTERVAL)
+            {
+                return (false, "Verification codes are sent too frequency! Please wait for " + (EMAIL_CODE_INTERVAL - usedSeconds) + " Seconds.");
+            }
+        }
+
+        String code = RandomTool.GenerateDigitalCode();
+
+        RedisTool.SetStringValue(key, code, CommonConstant.CODE_TIME);
+
+        return (true, code);
     }
 
 }

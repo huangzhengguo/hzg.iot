@@ -119,7 +119,7 @@ public class JwtService : IJwtService
 
         var jwt = new JwtAuthDto
         {
-            UserId = userDto.UserId,
+            // UserId = userDto.UserId,
             Token = tokenHandler.WriteToken(jwtSecurityToken),
             AuthTime = new DateTimeOffset(authAt).ToUnixTimeSeconds(),
             Expires = new DateTimeOffset(expires).ToUnixTimeSeconds(),

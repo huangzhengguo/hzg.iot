@@ -74,6 +74,31 @@ public class EmailService : IEmailService
     }
 
     /// <summary>
+    /// 发送邮件
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <param name="subject"></param>
+    /// <param name="content"></param>
+    /// <returns></returns>
+    public bool SendMail(SmtpClient sender, String from, String to, String subject, String content)
+    {
+        var mailMessage = new MailMessage();
+
+        mailMessage.From = new MailAddress(from, from, Encoding.UTF8);
+        mailMessage.To.Add(new MailAddress(to));
+        mailMessage.SubjectEncoding = Encoding.UTF8;
+        mailMessage.Subject = subject;
+        mailMessage.BodyEncoding = Encoding.UTF8;
+        mailMessage.Body = content;
+
+        sender.Send(mailMessage);
+
+        return true;
+    }
+
+    /// <summary>
     /// 异步发送邮件
     /// </summary>
     /// <param name="email"></param>
