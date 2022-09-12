@@ -1,0 +1,7 @@
+{
+    "thisUserAlreadyExists": "This user already exists!",
+    "thisUserNotExists": "This User Not Exists!",
+    "corpidDoesNotExist": "corpid does not exist!",
+    "corpidCannotEmpty": "Corpid Can not Empty!",
+    "emailCannotEmpty": "Email Can not Empty!" 
+}

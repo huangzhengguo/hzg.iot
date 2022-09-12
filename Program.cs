@@ -15,7 +15,6 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // 配置数据库连接
 builder.Services.AddAccountDbSqlService(builder.Configuration);
-builder.Services.AddIotSqlService(builder.Configuration);
 
 // JWT 服务
 builder.Services.AddJwt(builder.Configuration);
@@ -25,7 +24,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IVerifyCodeService, VerifyCodeService>();
 // 邮件服务
 builder.Services.AddTransient<IEmailService, EmailService>();
-
+builder.Services.AddSingleton<ILocalizerService, LocalizerService>();
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

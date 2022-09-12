@@ -14,6 +14,7 @@ using Hzg.Iot.Data;
 using Hzg.Iot.Models;
 using Hzg.Const;
 using Hzg.Tool;
+using Hzg.Data;
 
 namespace Hzg.Iot.Controllers;
 
@@ -23,7 +24,11 @@ namespace Hzg.Iot.Controllers;
 [Route("api/[controller]/")]
 public class MenuController : BaseController
 {
-    public MenuController(HzgIotContext context, IUserService userService) : base(context) {}
+    private readonly AccountDbContext _accountDbContext;
+    public MenuController(HzgIotContext context, IUserService userService, AccountDbContext accountDbContext) : base(context)
+    {
+        _accountDbContext = accountDbContext;
+    }
 
     /// <summary>
     /// 创建菜单
@@ -153,7 +158,7 @@ public class MenuController : BaseController
     [Route("get")]
     public async Task<string> Get()
     {
-        var data = await context.Menus.AsNoTracking().ToListAsync();
+        var data = await _accountDbContext.Menus.AsNoTracking().ToListAsync();
 
         var jsonData = MenuTool.GenerateTreeData(data, null, null);
         var result = new ResponseData()
@@ -180,8 +185,8 @@ public class MenuController : BaseController
         var menuPermissions = await context.MenuPermissions.AsNoTracking().Where(m => m.UserName == userName).ToListAsync();
 
         // 根据权限数据获取 Menu 列表
-        var menusToReturn = new List<Menu>();
-        var menus = await context.Menus.AsNoTracking().ToListAsync();
+        var menusToReturn = new List<Hzg.Models.Menu>();
+        var menus = await _accountDbContext.Menus.AsNoTracking().ToListAsync();
         foreach(var p in menuPermissions)
         {
             foreach(var m in menus)

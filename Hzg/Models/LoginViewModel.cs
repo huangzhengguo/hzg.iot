@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Hzg.Models;
 
-///
+/// <summary>
 /// 登录模型
-/// 
+/// </summary>
 public class LoginViewModel
 {
     ///

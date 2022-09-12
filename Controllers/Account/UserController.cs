@@ -24,10 +24,10 @@ namespace Hzg.Iot.Controllers;
 [Route("api/[controller]/")]
 public class UserController : ControllerBase
 {
-    private readonly AccountContext context;
+    private readonly AccountDbContext context;
     private readonly IUserService _userService;
     private readonly HzgIotContext _hzgIotContext;
-    public UserController(AccountContext accountContext, IUserService userService, HzgIotContext hzgIotContext)
+    public UserController(AccountDbContext accountContext, IUserService userService, HzgIotContext hzgIotContext)
     {
         this.context = accountContext;
         this._userService = userService;
@@ -191,7 +191,7 @@ public class UserController : ControllerBase
         // 这里只获取菜单权限数据
         var userName = await _userService.GetCurrentUserName();
 
-        var menus = await MenuTool.GetUserPermissionMenus(_hzgIotContext, userName);
+        var menus = await MenuTool.GetUserPermissionMenus(context, userName);
         var responseData = new ResponseData()
         {
             Code = ErrorCode.ErrorCode_Success,

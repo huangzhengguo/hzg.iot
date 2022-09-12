@@ -9,7 +9,6 @@ using Hzg.Services;
 using Hzg.Models;
 using Hzg.Const;
 using Hzg.Tool;
-using Hzg.Iot.Data;
 
 namespace Hzg.Iot.Controllers;
 
@@ -21,14 +20,13 @@ namespace Hzg.Iot.Controllers;
 [Route("api/[controller]/")]
 public class AccountController : ControllerBase
 {
-    private readonly AccountContext _accountContext;
+    private readonly AccountDbContext _accountContext;
     private IConfiguration _configuration;
     private readonly IJwtService _jwtService;
     private readonly ILogger<LoginViewModel> _logger;
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
     private readonly IVerifyCodeService _verifyCodeService;
-    private readonly HzgIotContext _hzgIotContext;
 
     /// <summary>
     /// 构造方法
@@ -36,14 +34,13 @@ public class AccountController : ControllerBase
     /// <param name="inledcoContext">数据库上下文</param>
     /// <param name="configuration">配置</param>
     /// <param name="jwtService">JWT服务</param>
-    public AccountController(AccountContext accountContext,
+    public AccountController(AccountDbContext accountContext,
                              IConfiguration configuration,
                              IJwtService jwtService,
                              ILogger<LoginViewModel> logger,
                              IUserService userService,
                              IEmailService emailService,
-                             IVerifyCodeService verifyCodeService,
-                             HzgIotContext hzgIotContext)
+                             IVerifyCodeService verifyCodeService)
     {
         _accountContext = accountContext;
         _configuration = configuration;
@@ -52,7 +49,6 @@ public class AccountController : ControllerBase
         _logger = logger;
         _emailService = emailService;
         _verifyCodeService = verifyCodeService;
-        _hzgIotContext = hzgIotContext;
     }
 
     /// <summary>
@@ -82,7 +78,7 @@ public class AccountController : ControllerBase
         // 1. 生成验证码
         // 2. 保存验证码到 redis
         // 3. 发送验证码到邮箱
-        _verifyCodeService.SendRegisterVerifyCode(email);
+        // _verifyCodeService.SendRegisterVerifyCode(email);
 
         return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());
     }
@@ -160,23 +156,39 @@ public class AccountController : ControllerBase
             Message = ErrorCodeMessage.Message(ErrorCode.ErrorCode_Success)
         };
 
-        var user = await _accountContext.Users.SingleOrDefaultAsync(u => u.Name == model.UserName && u.Password == model.Password);
+        var user = await _accountContext.Users.SingleOrDefaultAsync(u => u.Name == model.UserName);
+        if (user == null)
+        {
+            result.Code = ErrorCode.ErrorCode_Failed;
+            result.Message = "User not exist!";
+
+            return JsonSerializerTool.SerializeDefault(result);
+        }
+        var password = MD5Tool.Encrypt(model.Password, user.Salt);
+        if (password != user.Password)
+        {
+            result.Code = ErrorCode.ErrorCode_Failed;
+            result.Message = "Password not correct!";
+
+            return JsonSerializerTool.SerializeDefault(result);
+        }
+
         if (user != null)
         {
             var userDto = new UserDto();
 
-            userDto.UserId = user.Id;
+            // userDto.UserId = user.Id;
             userDto.UserName = user.Name;
 
             var jwtToken = _jwtService.GetnerateJWTToken(userDto);
 
-            // 获取用户菜单权限数据
-            var menusPermissionsToReturn = await MenuTool.GetUserPermissionMenus(_hzgIotContext, user.Name);
+
+            var menusToReturn = await MenuTool.GetUserPermissionMenus(_accountContext, user.Name);
 
             result.Data = new
             {
                 token = jwtToken,
-                menuData = menusPermissionsToReturn
+                menuData = menusToReturn
             };
 
             return JsonSerializer.Serialize(result, JsonSerializerTool.DefaultOptions());

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Hzg.Iot.Dto;
+namespace Hzg.Dto;
 
 /**
  * <p>

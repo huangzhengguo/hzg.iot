@@ -1,9 +1,5 @@
-using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Hzg.Data;
-using Hzg.Iot.Data;
 
 namespace Hzg.Services;
 
@@ -12,7 +8,7 @@ namespace Hzg.Services;
 /// </summary>
 public static class MySqlServerServiceExtesion
 {
-    private static MySqlServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 23));
+    private static MySqlServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 22));
     /// <summary>
     /// 添加 MySqlServer 服务
     /// </summary>
@@ -20,22 +16,9 @@ public static class MySqlServerServiceExtesion
     /// <param name="configuration"></param>
     public static void AddAccountDbSqlService(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AccountContext>(options =>
+        services.AddDbContext<AccountDbContext>(options =>
         {
-            options.UseMySql(configuration.GetConnectionString("MySQLAccountConnection"), serverVersion);
-        });
-    }
-
-    /// <summary>
-    /// 添加 MySqlServer 服务
-    /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configuration"></param>
-    static public void AddIotSqlService(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddDbContext<HzgIotContext>(options =>
-        {
-            options.UseMySql(configuration.GetConnectionString("HzgIotDbConnection"), serverVersion);
+            options.UseMySql(configuration.GetConnectionString("AccountDbConnection"), serverVersion);
         });
     }
 }

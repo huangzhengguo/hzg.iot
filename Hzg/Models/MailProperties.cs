@@ -5,55 +5,65 @@ namespace Hzg.Models;
 /// </summary>
 public class MailProperties
 {
-    /**
-     * 公司ID
-     */
-    public String CorpId { get; set; }
+    /// <summary>
+    /// 公司ID
+    /// </summary>
+    /// <value></value>
+    public Guid CorpId { get; set; }
 
-    /**
-     * 公司名称
-     */
+    /// <summary>
+    /// 公司名称
+    /// </summary>
+    /// <value></value>
     public String CorpName { get; set; }
 
-    /**
-     * 邮箱服务器
-     */
+    /// <summary>
+    /// 公司名称
+    /// </summary>
+    /// <value></value>
     public String Host { get; set; }
 
-    /**
-     * 端口
-     */
+    /// <summary>
+    /// 公司名称
+    /// </summary>
+    /// <value></value>
     public int Port { get; set; }
 
-    /**
-     * 编码
-     */
+    /// <summary>
+    /// 编码
+    /// </summary>
+    /// <value></value>
     public String Encoding { get; set; }
 
-    /**
-     * 协议
-     */
+    /// <summary>
+    /// 协议
+    /// </summary>
+    /// <value></value>
     public String Protocol { get; set; }
 
     public Dictionary<object, object> Properties { get; set; }
 
-    /**
-     * 发送邮箱
-     */
+    /// <summary>
+    /// 发送邮箱
+    /// </summary>
+    /// <value></value>
     public String UserName { get; set; }
 
-    /**
-     * 邮箱密码
-     */
+    /// <summary>
+    /// 邮箱密码
+    /// </summary>
+    /// <value></value>
     public String Password { get; set; }
 
-    /**
-     * 验证码注册邮件模板
-     */
+    /// <summary>
+    /// 验证码注册邮件模板
+    /// </summary>
+    /// <value></value>
     public VerificationTemplate VerificationRegistrationTemplate { get; set; }
 
-    /**
-     * 验证码重置密码邮件模板
-     */
+    /// <summary>
+    /// 验证码重置密码邮件模板
+    /// </summary>
+    /// <value></value>
     public VerificationTemplate VerificationResetTemplate { get; set; }
 }
